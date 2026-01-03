@@ -2,375 +2,297 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>馬卡龍飲料紀錄儀表板</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>馬卡龍飲料紀錄 App</title>
+    
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/kawaii-coffee.png">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/180/kawaii-coffee.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #FDF6F0;
-        }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #FDF6F0; -webkit-tap-highlight-color: transparent; }
+        .macaron-shadow { box-shadow: 0 15px 30px -10px rgba(255, 209, 220, 0.6); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #FFD1DC; border-radius: 10px; }
-        
-        /* 軟糖感陰影與動畫 */
-        .macaron-shadow {
-            box-shadow: 0 20px 40px -15px rgba(255, 209, 220, 0.5);
+        .modal-active { overflow: hidden; height: 100vh; position: fixed; width: 100%; }
+        input { font-size: 16px !important; }
+        .bg-pattern {
+            background-color: #FDF6F0;
+            background-image: radial-gradient(#FFD1DC 0.6px, transparent 0.6px);
+            background-size: 20px 20px;
         }
-        .glow-pink { box-shadow: 0 0 20px rgba(255, 209, 220, 0.3); }
-        .glow-blue { box-shadow: 0 0 20px rgba(186, 225, 255, 0.3); }
+        @keyframes sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+        .animate-sway { animation: sway 2.5s ease-in-out infinite; }
         
-        .modal-active {
-            overflow: hidden;
-        }
+        /* 推薦彈窗動畫 */
+        .toast-enter { transform: translateY(100px); opacity: 0; }
+        .toast-active { transform: translateY(0); opacity: 1; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     </style>
 </head>
-<body class="p-4 md:p-8">
-
-    <div id="app" class="max-w-4xl mx-auto rounded-[50px] shadow-2xl overflow-hidden bg-white border-[12px] border-white macaron-shadow">
+<body class="bg-pattern p-2 md:p-6">
+    <div id="app" class="max-w-md mx-auto rounded-[45px] shadow-2xl overflow-hidden bg-white/95 backdrop-blur-sm border-[6px] border-white macaron-shadow">
         
-        <!-- 頂部導覽列 -->
-        <header class="bg-[#FFF9DB] p-8 md:p-10 relative overflow-hidden">
-            <div class="absolute top-[-20px] right-[-20px] opacity-20">
-                <i data-lucide="sparkles" class="text-yellow-400 w-32 h-32"></i>
-            </div>
-            
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
-                <div class="flex items-center gap-4">
-                    <div class="bg-white p-4 rounded-[25px] shadow-sm transform -rotate-6">
-                        <i data-lucide="coffee" class="text-[#FFB7B2] w-9 h-9"></i>
+        <!-- 頂部標題 -->
+        <header class="bg-[#FFF9DB] p-6 relative overflow-hidden">
+            <div class="flex justify-between items-center relative z-10">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white p-2.5 rounded-2xl transform shadow-sm animate-sway">
+                        <i data-lucide="coffee" class="text-[#FFB7B2] w-6 h-6"></i>
                     </div>
                     <div>
-                        <h1 class="text-3xl font-black text-[#8B7355] tracking-tight">飲料紀錄</h1>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="bg-[#FFD1DC] text-[#D87093] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Sweetie</span>
-                            <p class="text-[#A68B6A] text-sm font-medium">My Beverage Diary</p>
-                        </div>
+                        <h1 class="text-xl font-black text-[#8B7355] tracking-tight">飲料紀錄</h1>
+                        <p class="text-[9px] text-[#A68B6A] font-bold uppercase tracking-widest opacity-60">Sugar & Happiness</p>
                     </div>
                 </div>
-
-                <div class="flex items-center gap-4 bg-white/60 backdrop-blur-sm px-6 py-3 rounded-full border border-white">
-                    <button onclick="changeMonth(-1)" class="text-[#8B7355] hover:scale-125 transition-transform">
-                        <i data-lucide="chevron-left"></i>
-                    </button>
-                    <div class="text-center min-w-[120px]">
-                        <span class="block text-[10px] font-black text-[#A68B6A] uppercase tracking-tighter">Current Month</span>
-                        <span id="current-month-display" class="text-xl font-black text-[#8B7355]">2026 / 1</span>
-                    </div>
-                    <button onclick="changeMonth(1)" class="text-[#8B7355] hover:scale-125 transition-transform">
-                        <i data-lucide="chevron-right"></i>
-                    </button>
+                <div class="flex items-center gap-2 bg-white/80 backdrop-blur-md px-3 py-2 rounded-full border border-white">
+                    <button onclick="changeMonth(-1)" class="text-[#FFB7B2] active:scale-75 transition-transform"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                    <span id="current-month-display" class="text-xs font-black text-[#8B7355] min-w-[65px] text-center"></span>
+                    <button onclick="changeMonth(1)" class="text-[#FFB7B2] active:scale-75 transition-transform"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
                 </div>
             </div>
         </header>
 
-        <!-- 統計數據儀表板 -->
-        <section class="px-6 md:px-8 py-10">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- 預算統計 -->
-                <div class="relative group">
-                    <div class="absolute inset-0 bg-[#FFD1DC] rounded-[40px] blur-xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                    <div class="relative bg-gradient-to-br from-[#FFD1DC] to-[#FFF0F3] p-8 rounded-[40px] border-b-8 border-[#FFB2C5] flex items-center justify-between">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2 text-[#D87093]">
-                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
-                                <span class="text-[10px] font-black uppercase tracking-widest">Monthly Budget</span>
-                            </div>
-                            <h3 class="text-4xl font-black text-[#D87093] flex items-baseline">
-                                <span class="text-xl mr-1">$</span><span id="stat-total-spent">0</span>
-                            </h3>
-                            <p class="text-xs font-bold text-[#D87093]/70">本月犒賞自己的總額</p>
-                        </div>
-                        <div class="bg-white/40 p-4 md:p-5 rounded-[30px] shadow-inner text-[#D87093]">
-                            <i data-lucide="dollar-sign" class="w-10 h-10" stroke-width="3"></i>
-                        </div>
-                    </div>
+        <!-- 數據儀表板 -->
+        <section class="p-4 grid grid-cols-2 gap-4">
+            <div class="bg-gradient-to-br from-[#FFD1DC] to-[#FFF0F3] p-5 rounded-[30px] border-b-4 border-[#FFB2C5] active:scale-95 transition-transform">
+                <div class="flex items-center gap-2 mb-1">
+                    <i data-lucide="wallet" class="w-3.5 h-3.5 text-[#D87093]"></i>
+                    <span class="text-[9px] font-black text-[#D87093] tracking-widest uppercase">支出預算</span>
                 </div>
-
-                <!-- 杯數統計 -->
-                <div class="relative group">
-                    <div class="absolute inset-0 bg-[#BAE1FF] rounded-[40px] blur-xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                    <div class="relative bg-gradient-to-br from-[#BAE1FF] to-[#EDF7FF] p-8 rounded-[40px] border-b-8 border-[#95CCF4] flex items-center justify-between">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2 text-[#5B9BD5]">
-                                <i data-lucide="heart" class="w-4 h-4 fill-current"></i>
-                                <span class="text-[10px] font-black uppercase tracking-widest">Cup Counter</span>
-                            </div>
-                            <h3 class="text-4xl font-black text-[#5B9BD5] flex items-baseline">
-                                <span id="stat-total-cups">0</span><span class="text-xl ml-1">杯</span>
-                            </h3>
-                            <p class="text-xs font-bold text-[#5B9BD5]/70">本月已收集的快樂能量</p>
-                        </div>
-                        <div class="bg-white/40 p-4 md:p-5 rounded-[30px] shadow-inner text-[#5B9BD5]">
-                            <i data-lucide="pie-chart" class="w-10 h-10" stroke-width="3"></i>
-                        </div>
-                    </div>
+                <h3 class="text-2xl font-black text-[#D87093]">$<span id="stat-total-spent">0</span></h3>
+            </div>
+            <div class="bg-gradient-to-br from-[#BAE1FF] to-[#EDF7FF] p-5 rounded-[30px] border-b-4 border-[#95CCF4] active:scale-95 transition-transform">
+                <div class="flex items-center gap-2 mb-1">
+                    <i data-lucide="heart" class="w-3.5 h-3.5 text-[#5B9BD5]"></i>
+                    <span class="text-[9px] font-black text-[#5B9BD5] tracking-widest uppercase">本月杯數</span>
                 </div>
+                <h3 class="text-2xl font-black text-[#5B9BD5]"><span id="stat-total-cups">0</span> 杯</h3>
             </div>
         </section>
 
-        <!-- 日曆區 -->
-        <section class="p-6 md:p-8 pt-0">
-            <div class="flex items-center gap-2 mb-6 px-2">
-                <div class="w-1.5 h-6 bg-[#E0BBE4] rounded-full"></div>
-                <h2 class="font-black text-[#8B7355] tracking-widest text-lg uppercase">Calendar</h2>
+        <!-- 隨機推薦 & 日曆 -->
+        <section class="px-5 space-y-4">
+            <div id="random-btn" onclick="pickRandomDrink()" class="cursor-pointer bg-[#FFF9DB]/50 border-2 border-white p-4 rounded-[28px] flex items-center justify-between shadow-sm active:scale-95 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                        <i data-lucide="dices" class="w-6 h-6 text-[#FFB7B2]"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-[#A68B6A] uppercase">Surprise Me!</p>
+                        <p class="text-xs font-bold text-[#8B7355]">點一下，決定今天喝什麼？</p>
+                    </div>
+                </div>
+                <i data-lucide="sparkles" class="w-4 h-4 text-yellow-400"></i>
             </div>
-            <div class="grid grid-cols-7 mb-4 px-2">
-                <div class="text-center text-[10px] font-black text-slate-300 tracking-widest">SUN</div>
-                <div class="text-center text-[10px] font-black text-slate-300 tracking-widest">MON</div>
-                <div class="text-center text-[10px] font-black text-slate-300 tracking-widest">TUE</div>
-                <div class="text-center text-[10px] font-black text-slate-300 tracking-widest">WED</div>
-                <div class="text-center text-[10px] font-black text-slate-300 tracking-widest">THU</div>
-                <div class="text-center text-[10px] font-black text-slate-300 tracking-widest">FRI</div>
-                <div class="text-center text-[10px] font-black text-slate-300 tracking-widest">SAT</div>
+
+            <div class="grid grid-cols-7 text-center text-[10px] font-black text-[#FFB7B2]/40 uppercase tracking-widest">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
             </div>
-            <div id="calendar-grid" class="grid grid-cols-7 gap-2 md:gap-4">
-                <!-- 日曆格會由 JS 生成 -->
+            <div id="calendar-grid" class="grid grid-cols-7 gap-2 pb-6"></div>
+        </section>
+
+        <!-- 底部統計 -->
+        <section class="p-6 bg-[#FDF6F0]/80 border-t border-white rounded-t-[45px]">
+            <div class="bg-white p-5 rounded-[35px] shadow-sm border border-pink-50">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="trophy" class="w-4 h-4 text-yellow-400"></i>
+                        <h4 class="text-[10px] font-black text-[#8B7355] uppercase tracking-widest">愛好第一名</h4>
+                    </div>
+                    <span id="top-item-count" class="text-[10px] font-black text-pink-300">0 次</span>
+                </div>
+                <p id="fav-item-name" class="text-lg font-black text-[#8B7355]">還沒開始喝喔～</p>
+                <div class="w-full bg-slate-50 h-2.5 rounded-full mt-3 overflow-hidden">
+                    <div id="stat-bar" class="bg-gradient-to-r from-pink-200 to-pink-100 h-full w-0 transition-all duration-1000"></div>
+                </div>
             </div>
+            <div class="h-4"></div>
         </section>
     </div>
 
     <!-- 編輯彈窗 -->
-    <div id="modal-overlay" class="fixed inset-0 bg-[#8B7355]/40 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white rounded-[40px] md:rounded-[50px] w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl border-8 border-white flex flex-col relative my-auto">
-            
-            <!-- 固定的標題列 -->
-            <div class="bg-white p-6 md:p-8 flex justify-between items-center border-b border-slate-50 z-20 shrink-0">
-                <div class="flex items-center gap-3">
-                    <div class="bg-[#FFF9DB] p-2 rounded-xl text-yellow-600"><i data-lucide="utensils" class="w-5 h-5"></i></div>
-                    <h2 id="modal-title" class="text-xl md:text-2xl font-black text-[#8B7355]">點單紀錄</h2>
-                </div>
-                <button onclick="closeModal()" class="bg-slate-50 text-slate-300 hover:text-pink-400 p-2 rounded-full transition-colors text-2xl font-bold">&times;</button>
+    <div id="modal-overlay" class="fixed inset-0 bg-[#8B7355]/40 backdrop-blur-md hidden items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+        <div class="bg-white rounded-t-[45px] sm:rounded-[45px] w-full max-w-md max-h-[92vh] overflow-hidden flex flex-col shadow-2xl border-t-8 sm:border-8 border-white">
+            <div class="p-6 pb-2 flex justify-between items-center">
+                <h2 id="modal-title" class="text-lg font-black text-[#8B7355]">甜蜜紀錄</h2>
+                <button onclick="closeModal()" class="w-10 h-10 flex items-center justify-center bg-slate-50 rounded-full text-slate-300 text-2xl active:rotate-90 transition-transform">&times;</button>
             </div>
-            
-            <!-- 可滾動的內容區 -->
-            <div id="modal-content" class="flex-grow overflow-y-auto p-6 md:p-8 pt-10 space-y-14 custom-scrollbar">
-                <!-- 兩杯飲料的輸入區域 -->
+            <div id="modal-content" class="flex-grow overflow-y-auto p-5 space-y-6 custom-scrollbar">
                 <div id="drink-slots-container"></div>
-                <div class="h-10"></div>
             </div>
-            
-            <!-- 固定的底欄按鈕 -->
-            <div class="p-6 md:p-8 bg-white border-t border-slate-50 shrink-0 flex justify-center">
-                <button onclick="saveAndClose()" class="bg-[#FFB7B2] hover:bg-[#FF9AA2] text-white px-12 md:px-16 py-3 md:py-4 rounded-[25px] font-black text-base md:text-lg transition-all shadow-xl shadow-pink-100 hover:scale-105 active:scale-95">
-                    保存幸福紀錄
-                </button>
+            <div class="p-6 bg-white border-t border-slate-50">
+                <button onclick="saveAndClose()" class="w-full bg-[#FFB7B2] text-white py-4 rounded-[25px] font-black shadow-lg active:scale-95 transition-all">保存紀錄</button>
             </div>
         </div>
     </div>
 
+    <!-- 推薦結果 Toast -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#8B7355] text-white px-8 py-4 rounded-full shadow-2xl z-[100] hidden flex-col items-center">
+        <p class="text-[10px] font-bold opacity-70 mb-1">今日推薦結果</p>
+        <p id="toast-text" class="font-black text-lg">珍珠奶茶</p>
+    </div>
+
     <script>
-        // --- 狀態管理 ---
-        let state = {
-            currentDate: new Date(),
-            selectedDateKey: null,
-            records: JSON.parse(localStorage.getItem('drink_records') || '{}')
-        };
+        let state = { currentDate: new Date(), selectedDateKey: null, records: JSON.parse(localStorage.getItem('drink_records') || '{}') };
+        
+        const iceOptions = ['固定', '正常', '少冰', '微冰', '去冰', '常溫', '熱的'];
+        const sugarOptions = ['固定', '正常', '少糖', '半糖', '微糖', '一分', '無糖'];
+        const toppingOptions = ['波霸', '珍珠', '椰果', '芋圓', '粉粿', '仙草'];
 
-        const iceOptions = ['正常', '少冰', '微冰', '去冰', '常溫', '溫'];
-        const sugarOptions = ['全糖', '少糖', '半糖', '微糖', '一分糖', '無糖'];
-        const toppingOptions = ['波霸', '珍珠', '椰果', '芋圓', '粉粿'];
+        function init() { renderCalendar(); updateStats(); lucide.createIcons(); }
 
-        // --- 初始化 ---
-        function init() {
-            renderCalendar();
-            updateStats();
-            lucide.createIcons();
-        }
-
-        // --- 核心邏輯 ---
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             const display = document.getElementById('current-month-display');
             grid.innerHTML = '';
-
-            const year = state.currentDate.getFullYear();
-            const month = state.currentDate.getMonth();
-            display.innerText = `${year} / ${month + 1}`;
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysCount = new Date(year, month + 1, 0).getDate();
-
-            // 空白格
-            for (let i = 0; i < firstDay; i++) {
-                grid.innerHTML += '<div></div>';
-            }
-
-            // 日期格
-            for (let day = 1; day <= daysCount; day++) {
-                const dateKey = `${year}-${month + 1}-${day}`;
-                const dayRecords = state.records[dateKey] || [];
-                const drinkCount = dayRecords.filter(r => r.item).length;
-
+            const y = state.currentDate.getFullYear(), m = state.currentDate.getMonth();
+            display.innerText = `${y} / ${m + 1}`;
+            const first = new Date(y, m, 1).getDay(), count = new Date(y, m + 1, 0).getDate();
+            for (let i = 0; i < first; i++) grid.innerHTML += '<div></div>';
+            for (let d = 1; d <= count; d++) {
+                const key = `${y}-${m + 1}-${d}`;
+                const dayRecords = state.records[key] || [];
+                const drinks = dayRecords.filter(r => r && r.item).length;
                 const btn = document.createElement('button');
-                btn.className = `aspect-square rounded-[20px] md:rounded-[30px] flex flex-col items-center justify-center transition-all relative group
-                    ${drinkCount > 0 ? 'bg-[#FFF5F7] border-2 border-pink-100 shadow-sm' : 'bg-slate-50 border-2 border-transparent hover:border-pink-100'}`;
-                
-                let bubbles = '';
-                for(let i=0; i<drinkCount; i++) {
-                    bubbles += `<div class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-pink-300"></div>`;
-                }
-
-                btn.onclick = () => openModal(dateKey);
-                btn.innerHTML = `
-                    <span class="text-base md:text-xl font-black ${drinkCount > 0 ? 'text-pink-400' : 'text-slate-300'}">${day}</span>
-                    <div class="flex gap-0.5 mt-1">${bubbles}</div>
-                `;
+                btn.className = `aspect-square rounded-[22px] flex flex-col items-center justify-center border-2 transition-all active:scale-90 ${drinks > 0 ? 'bg-[#FFF5F7] border-pink-100' : 'bg-white border-slate-50 text-slate-200'}`;
+                btn.onclick = () => openModal(key);
+                btn.innerHTML = `<span class="text-sm font-black ${drinks > 0 ? 'text-pink-400' : ''}">${d}</span>`;
+                if(drinks > 0) btn.innerHTML += `<div class="flex gap-0.5 mt-1">${Array(drinks).fill('<div class="w-1.5 h-1.5 rounded-full bg-pink-300"></div>').join('')}</div>`;
                 grid.appendChild(btn);
             }
         }
 
-        function changeMonth(offset) {
-            state.currentDate.setMonth(state.currentDate.getMonth() + offset);
-            renderCalendar();
-            updateStats();
-        }
+        function changeMonth(off) { state.currentDate.setMonth(state.currentDate.getMonth() + off); renderCalendar(); updateStats(); }
 
         function updateStats() {
-            const year = state.currentDate.getFullYear();
-            const month = state.currentDate.getMonth() + 1;
-            const prefix = `${year}-${month}-`;
-            
-            let totalSpent = 0;
-            let totalCups = 0;
-
-            Object.keys(state.records).forEach(key => {
-                if (key.startsWith(prefix)) {
-                    state.records[key].forEach(r => {
-                        if (r.item) {
-                            totalSpent += Number(r.price || 0);
-                            totalCups++;
-                        }
-                    });
-                }
+            const y = state.currentDate.getFullYear(), m = state.currentDate.getMonth() + 1;
+            const pref = `${y}-${m}-`;
+            let spent = 0, cups = 0, items = {};
+            Object.keys(state.records).forEach(k => {
+                const curM = k.startsWith(pref);
+                (state.records[k] || []).forEach(r => {
+                    if (!r || !r.item) return;
+                    if (curM) { spent += Number(r.price || 0); cups++; }
+                    items[r.item] = (items[r.item] || 0) + 1;
+                });
             });
-
-            document.getElementById('stat-total-spent').innerText = totalSpent;
-            document.getElementById('stat-total-cups').innerText = totalCups;
+            document.getElementById('stat-total-spent').innerText = spent;
+            document.getElementById('stat-total-cups').innerText = cups;
+            
+            const top = Object.entries(items).sort((a,b)=>b[1]-a[1])[0];
+            const favName = document.getElementById('fav-item-name');
+            const favCount = document.getElementById('top-item-count');
+            const bar = document.getElementById('stat-bar');
+            
+            if(top) {
+                favName.innerText = top[0];
+                favCount.innerText = `${top[1]} 次`;
+                bar.style.width = '100%';
+            } else {
+                favName.innerText = '尚未有數據';
+                favCount.innerText = '0 次';
+                bar.style.width = '0%';
+            }
         }
 
-        // --- 彈窗處理 ---
-        function openModal(dateKey) {
-            state.selectedDateKey = dateKey;
-            const [y, m, d] = dateKey.split('-');
-            document.getElementById('modal-title').innerText = `${m} / ${d} 點單紀錄`;
+        function pickRandomDrink() {
+            const allItems = [];
+            Object.values(state.records).forEach(day => {
+                if(Array.isArray(day)) day.forEach(r => { if(r && r.item) allItems.push(r.item); });
+            });
             
+            const unique = [...new Set(allItems)];
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+
+            if(unique.length === 0) {
+                showToast("先去紀錄一些想喝的飲料吧！☕️");
+                return;
+            }
+            
+            const random = unique[Math.floor(Math.random() * unique.length)];
+            showToast(`✨ 來一杯「${random}」如何？`);
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            toastText.innerText = text;
+            toast.classList.remove('hidden');
+            toast.classList.add('toast-active');
+            setTimeout(() => {
+                toast.classList.remove('toast-active');
+                setTimeout(() => toast.classList.add('hidden'), 500);
+            }, 3000);
+        }
+
+        function openModal(key) {
+            state.selectedDateKey = key;
+            const [y, m, d] = key.split('-');
+            document.getElementById('modal-title').innerText = `${m}月${d}日 點單`;
             renderDrinkSlots();
-            document.getElementById('modal-overlay').classList.remove('hidden');
-            document.getElementById('modal-overlay').classList.add('flex');
+            document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
             document.body.classList.add('modal-active');
             lucide.createIcons();
         }
 
         function closeModal() {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            document.getElementById('modal-overlay').classList.remove('flex');
+            document.getElementById('modal-overlay').classList.replace('flex', 'hidden');
             document.body.classList.remove('modal-active');
-            renderCalendar();
-            updateStats();
+            renderCalendar(); updateStats();
         }
 
         function renderDrinkSlots() {
-            const container = document.getElementById('drink-slots-container');
-            container.innerHTML = '';
-            
-            const currentData = state.records[state.selectedDateKey] || [{}, {}];
-            
+            const con = document.getElementById('drink-slots-container');
+            con.innerHTML = '';
+            const cur = state.records[state.selectedDateKey] || [{}, {}];
             [0, 1].forEach(idx => {
-                const data = currentData[idx] || { ice: '正常', sugar: '無糖', toppings: [] };
+                const d = cur[idx] || { toppings: [] };
                 const slot = document.createElement('div');
-                slot.className = "relative p-6 rounded-[35px] bg-slate-50/50 border-2 border-dashed border-slate-100 mb-14";
-                
+                slot.className = "bg-slate-50/70 p-5 rounded-[35px] border-2 border-white shadow-sm space-y-4";
                 slot.innerHTML = `
-                    <div class="absolute -top-4 left-6 bg-white px-4 py-1 rounded-full border border-slate-100 font-black text-[10px] text-pink-300 tracking-[0.2em] z-10 shadow-sm">
-                        DRINK 0${idx + 1}
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-black text-pink-200 tracking-widest uppercase">Item 0${idx+1}</span>
+                        <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-pink-50 shadow-sm">
+                            <span class="text-pink-300 font-bold text-xs">$</span>
+                            <input type="number" inputmode="numeric" onchange="upd(${idx},'price',this.value)" value="${d.price||''}" class="w-10 text-xs font-black text-[#8B7355] outline-none" placeholder="0">
+                        </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 gap-6 mb-8 mt-4">
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Store 店名</label>
-                            <input type="text" onchange="updateValue(${idx}, 'shop', this.value)" value="${data.shop || ''}" class="w-full bg-white border-none rounded-2xl p-4 text-sm shadow-sm focus:ring-4 focus:ring-pink-50 outline-none transition-all" placeholder="在哪間店買的？">
-                        </div>
+                    <div class="space-y-3">
+                        <input type="text" onchange="upd(${idx},'shop',this.value)" value="${d.shop||''}" class="w-full bg-white rounded-2xl p-4 text-sm outline-none border border-transparent focus:border-pink-100 placeholder:text-slate-200" placeholder="哪間店？">
+                        <input type="text" onchange="upd(${idx},'item',this.value)" value="${d.item||''}" class="w-full bg-white rounded-2xl p-4 text-sm outline-none border border-transparent focus:border-pink-100 placeholder:text-slate-200" placeholder="喝什麼？">
                         
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Item & Price 品項與價格</label>
-                            <div class="flex gap-2 w-full items-center">
-                                <input type="text" onchange="updateValue(${idx}, 'item', this.value)" value="${data.item || ''}" class="flex-[3] min-w-0 bg-white border-none rounded-2xl p-4 text-sm shadow-sm focus:ring-4 focus:ring-pink-50 outline-none transition-all" placeholder="喝什麼品項？">
-                                <div class="flex-1 min-w-[90px] relative">
-                                    <input type="number" onchange="updateValue(${idx}, 'price', this.value)" value="${data.price || ''}" class="w-full bg-white border-none rounded-2xl p-4 pl-7 text-sm shadow-sm focus:ring-4 focus:ring-pink-50 outline-none transition-all" placeholder="價格">
-                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs font-bold">$</span>
-                                </div>
+                        <div class="flex flex-wrap gap-1.5">${iceOptions.map(o => `<button onclick="upd(${idx},'ice','${o}')" class="px-3 py-2 text-[10px] font-black rounded-xl transition-all ${d.ice===o?'bg-[#E0BBE4] text-white shadow-md':'bg-white text-slate-300'}">${o}</button>`).join('')}</div>
+                        <div class="flex flex-wrap gap-1.5">${sugarOptions.map(o => `<button onclick="upd(${idx},'sugar','${o}')" class="px-3 py-2 text-[10px] font-black rounded-xl transition-all ${d.sugar===o?'bg-[#BAE1FF] text-white shadow-md':'bg-white text-slate-300'}">${o}</button>`).join('')}</div>
+                        
+                        <div class="flex flex-wrap gap-2 items-center pt-2">
+                            ${toppingOptions.map(o => `<button onclick="tog(${idx},'${o}')" class="px-3 py-1.5 text-[10px] font-black rounded-full border-2 transition-all ${d.toppings?.includes(o)?'bg-[#BFFCC6] border-[#BFFCC6] text-green-600 shadow-sm':'bg-white border-white text-slate-300'}">${o}</button>`).join('')}
+                            <div class="flex items-center gap-2 bg-pink-50/50 px-3 py-1.5 rounded-full border-2 border-dashed border-pink-100">
+                                <i data-lucide="plus" class="w-3 h-3 text-pink-300"></i>
+                                <input type="text" onchange="upd(${idx},'other',this.value)" value="${d.other||''}" class="w-16 bg-transparent text-[10px] font-black text-[#8B7355] outline-none placeholder:text-pink-200" placeholder="加料">
                             </div>
                         </div>
                     </div>
-
-                    <div class="mb-8">
-                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest block mb-3">Ice Level 冰塊</label>
-                        <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
-                            ${iceOptions.map(opt => `
-                                <button onclick="updateValue(${idx}, 'ice', '${opt}')" class="py-3 text-[10px] md:text-xs font-bold rounded-2xl transition-all ${data.ice === opt ? 'bg-[#E0BBE4] text-purple-700 shadow-md scale-95' : 'bg-white text-slate-400 shadow-sm'}">${opt}</button>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <div class="mb-8">
-                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest block mb-3">Sweetness 甜度</label>
-                        <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
-                            ${sugarOptions.map(opt => `
-                                <button onclick="updateValue(${idx}, 'sugar', '${opt}')" class="py-3 text-[10px] md:text-xs font-bold rounded-2xl transition-all ${data.sugar === opt ? 'bg-[#BAE1FF] text-blue-700 shadow-md scale-95' : 'bg-white text-slate-400 shadow-sm'}">${opt}</button>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest block mb-3">Toppings 配料</label>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            ${toppingOptions.map(opt => `
-                                <button onclick="toggleTopping(${idx}, '${opt}')" class="px-4 md:px-5 py-2 text-[10px] md:text-xs font-bold rounded-full transition-all border-2 ${data.toppings?.includes(opt) ? 'bg-[#BFFCC6] border-[#BFFCC6] text-green-700 shadow-sm' : 'bg-white border-slate-50 text-slate-400 shadow-sm'}">${opt}</button>
-                            `).join('')}
-                        </div>
-                        <input type="text" onchange="updateValue(${idx}, 'otherTopping', this.value)" value="${data.otherTopping || ''}" class="w-full bg-white border-none rounded-2xl p-4 text-sm shadow-sm focus:ring-4 focus:ring-green-50 outline-none transition-all" placeholder="自填其他配料...">
-                    </div>
                 `;
-                container.appendChild(slot);
+                con.appendChild(slot);
             });
         }
 
-        // --- 資料更新 ---
-        window.updateValue = function(idx, field, val) {
-            if (!state.records[state.selectedDateKey]) {
-                state.records[state.selectedDateKey] = [{}, {}];
-            }
-            state.records[state.selectedDateKey][idx][field] = val;
+        window.upd = (idx, f, v) => { if(!state.records[state.selectedDateKey]) state.records[state.selectedDateKey]=[{},{}]; state.records[state.selectedDateKey][idx][f]=v; renderDrinkSlots(); };
+        window.tog = (idx, t) => {
+            if(!state.records[state.selectedDateKey]) state.records[state.selectedDateKey]=[{toppings:[]},{toppings:[]}];
+            let list = state.records[state.selectedDateKey][idx].toppings || [];
+            state.records[state.selectedDateKey][idx].toppings = list.includes(t) ? list.filter(x=>x!==t) : [...list, t];
             renderDrinkSlots();
         };
-
-        window.toggleTopping = function(idx, topping) {
-            if (!state.records[state.selectedDateKey]) {
-                state.records[state.selectedDateKey] = [
-                    { toppings: [] }, { toppings: [] }
-                ];
-            }
-            let current = state.records[state.selectedDateKey][idx].toppings || [];
-            if (current.includes(topping)) {
-                state.records[state.selectedDateKey][idx].toppings = current.filter(t => t !== topping);
-            } else {
-                state.records[state.selectedDateKey][idx].toppings = [...current, topping];
-            }
-            renderDrinkSlots();
-        };
-
-        window.saveAndClose = function() {
-            localStorage.setItem('drink_records', JSON.stringify(state.records));
-            closeModal();
-        };
-
-        // 啟動
+        window.saveAndClose = () => { localStorage.setItem('drink_records', JSON.stringify(state.records)); closeModal(); };
         window.onload = init;
     </script>
 </body>
 </html>
+
 
