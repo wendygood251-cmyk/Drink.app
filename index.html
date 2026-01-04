@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>萱の飲料日誌</title>
     
-    <!-- PWA 配置 -->
+    <!-- PWA 配置 - 文青日系風格優化 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="萱の日誌">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/plasticine/200/tea-cup.png">
+    
+    <!-- 使用 SVG Data URI 作為日系文青圖示 -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23F2EEE9'/%3E%3Ccircle cx='90' cy='90' r='75' fill='%23FFFFFF' opacity='0.5'/%3E%3Cpath d='M75 60 L105 60 L100 120 L80 120 Z' fill='%235A524D'/%3E%3Cpath d='M100 65 L115 50' stroke='%235A524D' stroke-width='4' stroke-linecap='round'/%3E%3Ctext x='90' y='145' font-family='Noto Serif TC' font-weight='900' font-size='14' fill='%235A524D' text-anchor='middle'%3E日誌%3C/text%3E%3C/svg%3E">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -35,7 +37,8 @@
             background-color: var(--bg-soft); 
             color: var(--text-dark);
             -webkit-tap-highlight-color: transparent;
-            padding-bottom: 40px;
+            padding-bottom: env(safe-area-inset-bottom, 40px);
+            padding-top: env(safe-area-inset-top, 0px);
         }
 
         .serif-title { font-family: 'Noto Serif TC', serif; }
@@ -80,9 +83,28 @@
         }
 
         .has-record { background: #5A524D !important; color: #FFFFFF !important; font-weight: 900; }
-        .is-today { border: 2px solid #5A524D; color: #5A524D; font-weight: 900; }
+        .is-today { border: 2.5px solid #5A524D; color: #5A524D; font-weight: 900; }
         .dot { width: 4px; height: 4px; border-radius: 50%; background: #FFB7C5; position: absolute; bottom: 6px; }
         
+        .encourage-card {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 12px 16px;
+            border: 1px dashed #E5E1DD;
+            transition: all 0.5s ease;
+        }
+
+        .custom-input {
+            border: 1.5px solid #F5F0EB;
+            background: #FFFFFF;
+            border-radius: 14px;
+            padding: 10px 15px;
+            font-size: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .custom-input:focus { border-color: #D1C7BD; }
+
         @keyframes slideUp {
             from { transform: translateY(100%); }
             to { transform: translateY(0); }
@@ -105,7 +127,8 @@
             </div>
         </header>
 
-        <div class="paper-card p-7 space-y-7">
+        <!-- 主面板 -->
+        <div class="paper-card p-7 space-y-6">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3 bg-stone-100/60 px-4 py-2 rounded-2xl">
                     <button onclick="changeMonth(-1)"><i data-lucide="chevron-left" class="w-4 h-4 text-stone-400"></i></button>
@@ -113,35 +136,45 @@
                     <button onclick="changeMonth(1)"><i data-lucide="chevron-right" class="w-4 h-4 text-stone-400"></i></button>
                 </div>
                 <div class="w-10 h-10 bg-[var(--m-yellow)] rounded-full flex items-center justify-center shadow-inner">
-                    <i data-lucide="sparkles" class="text-amber-400 w-5 h-5"></i>
+                    <i data-lucide="heart" class="text-rose-400 w-5 h-5"></i>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
-                    <p class="text-[10px] font-bold text-stone-300 uppercase tracking-widest">本月花費總額</p>
+                    <p class="text-[10px] font-bold text-stone-300 uppercase tracking-widest">本月消費</p>
                     <h2 class="text-4xl font-black text-stone-700 leading-none tracking-tighter">$<span id="stat-price">0</span></h2>
                 </div>
                 <div class="text-right space-y-1">
-                    <p class="text-[10px] font-bold text-stone-300 uppercase tracking-widest">本月杯數</p>
+                    <p class="text-[10px] font-bold text-stone-300 uppercase tracking-widest">本月數量</p>
                     <h2 class="text-4xl font-black text-stone-700 leading-none tracking-tighter"><span id="stat-cups">0</span> <span class="text-xs font-medium">杯</span></h2>
                 </div>
             </div>
 
-            <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                    <span class="text-[11px] font-bold text-stone-500 flex items-center gap-2">
-                        <i data-lucide="activity" class="w-3.5 h-3.5 text-rose-300"></i> 健康平衡指數
-                    </span>
-                    <span id="health-score-text" class="text-xs font-black text-stone-400">100%</span>
+            <!-- 健康指數與鼓勵小語 -->
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-[11px] font-bold text-stone-500 flex items-center gap-2">
+                            <i data-lucide="leaf" class="w-3.5 h-3.5 text-green-400"></i> 健康平衡指數
+                        </span>
+                        <span id="health-score-text" class="text-xs font-black text-stone-400">100%</span>
+                    </div>
+                    <div class="w-full h-3 bg-stone-100/80 rounded-full overflow-hidden border border-white p-[2px]">
+                        <div id="health-progress" class="h-full rounded-full health-gradient" style="width: 100%"></div>
+                    </div>
                 </div>
-                <div class="w-full h-3 bg-stone-100/80 rounded-full overflow-hidden border border-white p-[2px]">
-                    <div id="health-progress" class="h-full rounded-full health-gradient" style="width: 100%"></div>
+
+                <div class="encourage-card flex items-start gap-3">
+                    <i data-lucide="message-circle" class="w-4 h-4 text-stone-300 mt-0.5"></i>
+                    <p id="health-encourage" class="text-[11px] leading-relaxed text-stone-500 font-medium">
+                        加載中...
+                    </p>
                 </div>
-                <p id="health-tip" class="text-[10px] text-stone-400 italic text-center">今天也要記得多喝白開水唷，萱 ✨</p>
             </div>
         </div>
 
+        <!-- 店家與品項統計 -->
         <div class="grid grid-cols-2 gap-4">
             <div class="paper-card p-5 space-y-2 border-b-4 border-b-[var(--m-blue)]">
                 <p class="text-[9px] font-black text-stone-300 tracking-widest uppercase">Favorite Shop</p>
@@ -153,6 +186,7 @@
             </div>
         </div>
 
+        <!-- 日曆區塊 -->
         <div class="paper-card p-6">
             <div class="grid grid-cols-7 text-center text-[10px] font-black text-stone-300 uppercase tracking-[0.2em] mb-5">
                 <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
@@ -163,7 +197,7 @@
         <div class="h-10"></div>
     </div>
 
-    <!-- 編輯彈窗 -->
+    <!-- 彈窗 -->
     <div id="modal-overlay" class="fixed inset-0 bg-stone-900/40 backdrop-blur-md hidden z-50 items-end justify-center">
         <div class="bg-white w-full max-w-md rounded-t-[45px] p-8 space-y-6 max-h-[90vh] overflow-y-auto no-scrollbar modal-animate shadow-2xl">
             <div class="flex justify-between items-center pb-2">
@@ -190,6 +224,7 @@
         </div>
     </div>
 
+    <!-- Toast -->
     <div id="toast" class="fixed bottom-12 left-1/2 -translate-x-1/2 bg-stone-800/90 text-white px-8 py-3.5 rounded-full text-[11px] font-bold shadow-2xl z-[100] opacity-0 pointer-events-none transition-all duration-500"></div>
 
     <script>
@@ -197,20 +232,28 @@
         const sugarOpts = ['固定', '正常', '少糖', '半糖', '微糖', '一分', '無糖'];
         const topOpts = ['珍珠', '波霸', '椰果', '芋圓', '仙草', '布丁'];
 
+        const encourageMessages = {
+            perfect: ["萱，你今天也太自律了吧！✨", "100% 的完美，身體會感謝你的。", "你是健康小達人，繼續保持唷！"],
+            good: ["表現很棒！記得也要多喝白開水唷。", "微糖的生活也是一種幸福。", "今天的平衡抓得很不錯呢！"],
+            warning: ["今天稍微甜了一點點，明天再努力平衡回來！", "飲料雖然好喝，但要適量喔，萱。", "感覺今天心情很需要甜甜的能量？"],
+            danger: ["哎呀，糖分超標啦！明天改喝無糖茶好嗎？", "水是最好的保養品，現在去喝一杯水吧！", "為了健康，稍微控制一下口腹之欲唷。"]
+        };
+
         let state = {
             viewDate: new Date(),
-            records: JSON.parse(localStorage.getItem('xuan_v10_records') || '{}'),
+            records: JSON.parse(localStorage.getItem('xuan_v13_records') || '{}'),
             activeKey: null,
             tempData: [{}, {}],
             user: null
         };
 
+        // Firebase 初始化
         try {
             const config = JSON.parse(__firebase_config);
             firebase.initializeApp(config);
             const db = firebase.firestore();
             const auth = firebase.auth();
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'xuan-diary-v10';
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'xuan-diary-v13';
 
             auth.onAuthStateChanged(user => {
                 if(user) {
@@ -224,7 +267,7 @@
                             renderCalendar();
                             updateStats();
                         }
-                    });
+                    }, err => updateSyncUI('offline', '本地模式'));
                 } else {
                     auth.signInAnonymously().catch(() => updateSyncUI('offline', '本地模式'));
                 }
@@ -276,7 +319,7 @@
             container.innerHTML = '';
             state.tempData.forEach((data, idx) => {
                 const div = document.createElement('div');
-                div.className = "bg-stone-50/80 p-6 rounded-[35px] space-y-5 border border-white relative";
+                div.className = "bg-stone-50/80 p-6 rounded-[35px] space-y-5 border border-white relative shadow-inner";
                 div.innerHTML = `
                     <div class="flex justify-between items-center">
                         <span class="text-[10px] font-black text-stone-300 tracking-widest uppercase">Drink ${idx+1}</span>
@@ -291,21 +334,23 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="text" value="${data.shop||''}" oninput="updateTemp(${idx},'shop',this.value)" class="p-4 bg-white rounded-2xl text-xs outline-none border border-stone-100 shadow-inner" placeholder="店家">
-                        <input type="text" value="${data.item||''}" oninput="updateTemp(${idx},'item',this.value)" class="p-4 bg-white rounded-2xl text-xs outline-none border border-stone-100 shadow-inner" placeholder="飲料名稱">
+                        <input type="text" value="${data.shop||''}" oninput="updateTemp(${idx},'shop',this.value)" class="p-4 bg-white rounded-2xl text-xs outline-none border border-stone-100" placeholder="店家">
+                        <input type="text" value="${data.item||''}" oninput="updateTemp(${idx},'item',this.value)" class="p-4 bg-white rounded-2xl text-xs outline-none border border-stone-100" placeholder="飲料名稱">
                     </div>
                     <div class="space-y-2">
-                        <p class="text-[9px] font-bold text-stone-300 ml-1">ICE LEVEL</p>
+                        <p class="text-[9px] font-bold text-stone-300 ml-1 uppercase">Ice</p>
                         <div class="flex flex-wrap gap-2">${iceOpts.map(o => `<button onclick="updateTemp(${idx},'ice','${o}')" class="option-btn ${data.ice===o?'active-ice':''}">${o}</button>`).join('')}</div>
                     </div>
                     <div class="space-y-2">
-                        <p class="text-[9px] font-bold text-stone-300 ml-1">SUGAR LEVEL</p>
+                        <p class="text-[9px] font-bold text-stone-300 ml-1 uppercase">Sugar</p>
                         <div class="flex flex-wrap gap-2">${sugarOpts.map(o => `<button onclick="updateTemp(${idx},'sugar','${o}')" class="option-btn ${data.sugar===o?'active-sugar':''}">${o}</button>`).join('')}</div>
                     </div>
-                    <div class="space-y-2">
-                        <p class="text-[9px] font-bold text-stone-300 ml-1">TOPPINGS</p>
+                    <div class="space-y-3">
+                        <p class="text-[9px] font-bold text-stone-300 ml-1 uppercase">Toppings</p>
                         <div class="flex flex-wrap gap-2">${topOpts.map(o => `<button onclick="toggleTop(${idx},'${o}')" class="option-btn ${(data.tops||[]).includes(o)?'active-top':''}">${o}</button>`).join('')}</div>
-                        <input type="text" value="${data.customTop||''}" oninput="updateTemp(${idx},'customTop',this.value)" class="w-full p-4 bg-white rounded-2xl text-[11px] outline-none border border-stone-100 mt-2 shadow-inner" placeholder="自填其他加料...">
+                        <div class="px-1">
+                            <input type="text" value="${data.customTop||''}" oninput="updateTemp(${idx},'customTop',this.value)" class="w-full custom-input" placeholder="自填其他加料（如：小芋圓、椰果...）">
+                        </div>
                     </div>
                 `;
                 container.appendChild(div);
@@ -316,7 +361,7 @@
         function clearEntry(idx) {
             state.tempData[idx] = {};
             renderEntries();
-            showToast("已清空該欄位");
+            showToast("已重置欄位");
         }
 
         function updateTemp(idx, f, v) { 
@@ -337,19 +382,20 @@
             closeModal();
             showToast("✨ 紀錄已保存");
             if(state.user) {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'xuan-diary-v10';
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'xuan-diary-v13';
                 firebase.firestore().collection('artifacts').doc(appId).collection('users').doc(state.user.uid).collection('settings').doc('main')
                 .set({ records: state.records }, { merge: true });
             }
         }
 
-        function saveLocal() { localStorage.setItem('xuan_v10_records', JSON.stringify(state.records)); }
+        function saveLocal() { localStorage.setItem('xuan_v13_records', JSON.stringify(state.records)); }
         function closeModal() { document.getElementById('modal-overlay').classList.replace('flex', 'hidden'); }
         function changeMonth(s) { state.viewDate.setMonth(state.viewDate.getMonth() + s); renderCalendar(); }
 
         function updateStats() {
             const y = state.viewDate.getFullYear(), m = state.viewDate.getMonth() + 1;
             let price = 0, cups = 0, penalty = 0, shops = {}, items = {};
+            
             Object.keys(state.records).forEach(k => {
                 if(k.startsWith(`${y}-${m}-`)) {
                     (state.records[k] || []).forEach(r => {
@@ -363,11 +409,23 @@
                     });
                 }
             });
+
             document.getElementById('stat-price').innerText = price;
             document.getElementById('stat-cups').innerText = cups;
+            
             const score = Math.max(0, 100 - penalty);
             document.getElementById('health-score-text').innerText = score + '%';
             document.getElementById('health-progress').style.width = score + '%';
+            
+            let category = 'perfect';
+            if(score < 60) category = 'danger';
+            else if(score < 80) category = 'warning';
+            else if(score < 100) category = 'good';
+            
+            const msgList = encourageMessages[category];
+            const seed = new Date().getDate() % msgList.length;
+            document.getElementById('health-encourage').innerText = msgList[seed];
+
             document.getElementById('top-shop').innerText = Object.entries(shops).sort((a,b)=>b[1]-a[1])[0]?.[0] || '尚未紀錄';
             document.getElementById('top-item').innerText = Object.entries(items).sort((a,b)=>b[1]-a[1])[0]?.[0] || '尚未紀錄';
         }
@@ -382,7 +440,7 @@
         window.onload = () => {
             const hr = new Date().getHours();
             const g = document.getElementById('greeting');
-            if(g) g.innerText = hr < 11 ? "Good Morning, Xuan" : hr < 17 ? "Good Afternoon, Xuan" : "Good Evening, Xuan";
+            if(g) g.innerText = hr < 11 ? "Morning, Xuan" : hr < 17 ? "Afternoon, Xuan" : "Evening, Xuan";
             renderCalendar();
             lucide.createIcons();
         };
