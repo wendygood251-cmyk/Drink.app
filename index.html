@@ -22,12 +22,11 @@
     
     <style>
         :root {
-            --m-pink: #FFDDE2;   /* 櫻花粉 */
-            --m-blue: #D6EFFF;   /* 蘇打藍 */
-            --m-yellow: #FFF9E3; /* 奶油黃 */
-            --m-green: #E2F5D6;  /* 抹茶綠 */
-            --m-purple: #E8E3FF; /* 薰衣草紫 */
-            --bg-soft: #FDFBFA;  /* 暖白底色 */
+            --m-pink: #FFDDE2;
+            --m-blue: #D6EFFF;
+            --m-yellow: #FFF9E3;
+            --m-green: #E2F5D6;
+            --bg-soft: #FDFBFA;
             --text-dark: #5A524D;
         }
 
@@ -41,7 +40,6 @@
 
         .serif-title { font-family: 'Noto Serif TC', serif; }
 
-        /* 漸層健康條 */
         .health-gradient {
             background: linear-gradient(90deg, #A8E6CF 0%, #FFD3B6 50%, #FFAAA5 100%);
             transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -55,7 +53,6 @@
             border: 1px solid rgba(255, 255, 255, 1);
         }
 
-        /* 選項按鈕美化 */
         .option-btn {
             transition: all 0.2s;
             border-radius: 14px;
@@ -84,24 +81,19 @@
 
         .has-record { background: #5A524D !important; color: #FFFFFF !important; font-weight: 900; }
         .is-today { border: 2px solid #5A524D; color: #5A524D; font-weight: 900; }
-        
         .dot { width: 4px; height: 4px; border-radius: 50%; background: #FFB7C5; position: absolute; bottom: 6px; }
         
-        /* 彈窗動畫 */
         @keyframes slideUp {
             from { transform: translateY(100%); }
             to { transform: translateY(0); }
         }
         .modal-animate { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="p-5">
 
     <div id="app" class="max-w-md mx-auto space-y-6">
-        
-        <!-- 頂部區塊 -->
         <header class="flex justify-between items-end px-2 pt-8">
             <div>
                 <p id="greeting" class="text-[10px] font-black text-stone-300 tracking-[0.3em] mb-1 uppercase">Have a sweet day</p>
@@ -113,13 +105,12 @@
             </div>
         </header>
 
-        <!-- 主數據看板 -->
         <div class="paper-card p-7 space-y-7">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3 bg-stone-100/60 px-4 py-2 rounded-2xl">
-                    <button onclick="changeMonth(-1)" class="text-stone-400 hover:text-stone-600"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-                    <span id="display-month" class="text-sm font-black text-stone-600 min-w-[85px] text-center tracking-tighter">2024 / 01</span>
-                    <button onclick="changeMonth(1)" class="text-stone-400 hover:text-stone-600"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    <button onclick="changeMonth(-1)"><i data-lucide="chevron-left" class="w-4 h-4 text-stone-400"></i></button>
+                    <span id="display-month" class="text-sm font-black text-stone-600 min-w-[85px] text-center tracking-tighter">---- / --</span>
+                    <button onclick="changeMonth(1)"><i data-lucide="chevron-right" class="w-4 h-4 text-stone-400"></i></button>
                 </div>
                 <div class="w-10 h-10 bg-[var(--m-yellow)] rounded-full flex items-center justify-center shadow-inner">
                     <i data-lucide="sparkles" class="text-amber-400 w-5 h-5"></i>
@@ -137,7 +128,6 @@
                 </div>
             </div>
 
-            <!-- 健康指數 (需求：漸層色) -->
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
                     <span class="text-[11px] font-bold text-stone-500 flex items-center gap-2">
@@ -152,7 +142,6 @@
             </div>
         </div>
 
-        <!-- 店家與種類統計 -->
         <div class="grid grid-cols-2 gap-4">
             <div class="paper-card p-5 space-y-2 border-b-4 border-b-[var(--m-blue)]">
                 <p class="text-[9px] font-black text-stone-300 tracking-widest uppercase">Favorite Shop</p>
@@ -164,7 +153,6 @@
             </div>
         </div>
 
-        <!-- 日曆區塊 -->
         <div class="paper-card p-6">
             <div class="grid grid-cols-7 text-center text-[10px] font-black text-stone-300 uppercase tracking-[0.2em] mb-5">
                 <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
@@ -190,37 +178,39 @@
             
             <div id="entries-container" class="space-y-8"></div>
 
-            <button onclick="saveData()" class="w-full bg-[#5A524D] text-white py-4.5 rounded-[25px] font-black text-lg shadow-xl shadow-stone-200 active:scale-[0.98] transition-all">
-                保存今日紀錄
-            </button>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="closeModal()" class="w-full bg-stone-100 text-stone-400 py-4.5 rounded-[25px] font-black text-lg active:scale-[0.98] transition-all">
+                    取消
+                </button>
+                <button onclick="saveData()" class="w-full bg-[#5A524D] text-white py-4.5 rounded-[25px] font-black text-lg shadow-xl shadow-stone-200 active:scale-[0.98] transition-all">
+                    保存
+                </button>
+            </div>
             <div class="h-10"></div>
         </div>
     </div>
 
-    <!-- Toast 提示 -->
     <div id="toast" class="fixed bottom-12 left-1/2 -translate-x-1/2 bg-stone-800/90 text-white px-8 py-3.5 rounded-full text-[11px] font-bold shadow-2xl z-[100] opacity-0 pointer-events-none transition-all duration-500"></div>
 
     <script>
-        // 設定選項
         const iceOpts = ['固定', '正常', '少冰', '微冰', '去冰', '常溫', '熱的'];
         const sugarOpts = ['固定', '正常', '少糖', '半糖', '微糖', '一分', '無糖'];
         const topOpts = ['珍珠', '波霸', '椰果', '芋圓', '仙草', '布丁'];
 
         let state = {
             viewDate: new Date(),
-            records: JSON.parse(localStorage.getItem('xuan_v9_records') || '{}'),
+            records: JSON.parse(localStorage.getItem('xuan_v10_records') || '{}'),
             activeKey: null,
             tempData: [{}, {}],
             user: null
         };
 
-        // Firebase 初始化
         try {
             const config = JSON.parse(__firebase_config);
             firebase.initializeApp(config);
             const db = firebase.firestore();
             const auth = firebase.auth();
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'xuan-diary-v9';
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'xuan-diary-v10';
 
             auth.onAuthStateChanged(user => {
                 if(user) {
@@ -244,26 +234,24 @@
         function updateSyncUI(mode, text) {
             const dot = document.getElementById('sync-dot');
             const txt = document.getElementById('sync-text');
-            txt.innerText = text;
-            dot.className = `w-2 h-2 rounded-full ${mode === 'cloud' ? 'bg-green-400' : 'bg-amber-300'}`;
+            if(txt) txt.innerText = text;
+            if(dot) dot.className = `w-2 h-2 rounded-full ${mode === 'cloud' ? 'bg-green-400' : 'bg-amber-300'}`;
         }
 
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
+            if(!grid) return;
             grid.innerHTML = '';
             const y = state.viewDate.getFullYear(), m = state.viewDate.getMonth();
             const days = new Date(y, m+1, 0).getDate();
             const first = new Date(y, m, 1).getDay();
             const today = new Date();
-
             document.getElementById('display-month').innerText = `${y} / ${String(m+1).padStart(2,'0')}`;
-
             for(let i=0; i<first; i++) grid.appendChild(document.createElement('div'));
             for(let d=1; d<=days; d++) {
                 const key = `${y}-${m+1}-${d}`;
                 const hasData = (state.records[key] || []).some(r => r.item);
                 const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
-                
                 const btn = document.createElement('button');
                 btn.className = `calendar-day hover:scale-110 active:scale-95 ${hasData ? 'has-record' : isToday ? 'is-today' : 'text-stone-300 bg-white/50'}`;
                 btn.innerHTML = `<span>${d}</span>${hasData ? '<div class="dot"></div>' : ''}`;
@@ -288,18 +276,23 @@
             container.innerHTML = '';
             state.tempData.forEach((data, idx) => {
                 const div = document.createElement('div');
-                div.className = "bg-stone-50/80 p-6 rounded-[35px] space-y-5 border border-white";
+                div.className = "bg-stone-50/80 p-6 rounded-[35px] space-y-5 border border-white relative";
                 div.innerHTML = `
                     <div class="flex justify-between items-center">
                         <span class="text-[10px] font-black text-stone-300 tracking-widest uppercase">Drink ${idx+1}</span>
-                        <div class="bg-white px-4 py-2 rounded-2xl border border-stone-100 flex items-center gap-2 shadow-sm">
-                            <span class="text-[11px] font-bold text-stone-400">$</span>
-                            <input type="number" value="${data.price||''}" oninput="updateTemp(${idx},'price',this.value)" class="w-12 text-sm font-black text-stone-600 outline-none bg-transparent" placeholder="0">
+                        <div class="flex items-center gap-3">
+                            <button onclick="clearEntry(${idx})" class="p-2 text-rose-200 hover:text-rose-400 active:scale-90 transition-all">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                            <div class="bg-white px-4 py-2 rounded-2xl border border-stone-100 flex items-center gap-2 shadow-sm">
+                                <span class="text-[11px] font-bold text-stone-400">$</span>
+                                <input type="number" value="${data.price||''}" oninput="updateTemp(${idx},'price',this.value)" class="w-12 text-sm font-black text-stone-600 outline-none bg-transparent" placeholder="0">
+                            </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <input type="text" value="${data.shop||''}" oninput="updateTemp(${idx},'shop',this.value)" class="p-4 bg-white rounded-2xl text-xs outline-none border border-stone-100" placeholder="店家">
-                        <input type="text" value="${data.item||''}" oninput="updateTemp(${idx},'item',this.value)" class="p-4 bg-white rounded-2xl text-xs outline-none border border-stone-100" placeholder="飲料名稱">
+                        <input type="text" value="${data.shop||''}" oninput="updateTemp(${idx},'shop',this.value)" class="p-4 bg-white rounded-2xl text-xs outline-none border border-stone-100 shadow-inner" placeholder="店家">
+                        <input type="text" value="${data.item||''}" oninput="updateTemp(${idx},'item',this.value)" class="p-4 bg-white rounded-2xl text-xs outline-none border border-stone-100 shadow-inner" placeholder="飲料名稱">
                     </div>
                     <div class="space-y-2">
                         <p class="text-[9px] font-bold text-stone-300 ml-1">ICE LEVEL</p>
@@ -317,9 +310,20 @@
                 `;
                 container.appendChild(div);
             });
+            lucide.createIcons();
         }
 
-        function updateTemp(idx, f, v) { state.tempData[idx][f] = v; if(['ice','sugar'].includes(f)) renderEntries(); }
+        function clearEntry(idx) {
+            state.tempData[idx] = {};
+            renderEntries();
+            showToast("已清空該欄位");
+        }
+
+        function updateTemp(idx, f, v) { 
+            state.tempData[idx][f] = v; 
+            if(['ice','sugar'].includes(f)) renderEntries(); 
+        }
+        
         function toggleTop(idx, v) { 
             let t = state.tempData[idx].tops || []; 
             state.tempData[idx].tops = t.includes(v) ? t.filter(x=>x!==v) : [...t, v]; 
@@ -333,13 +337,13 @@
             closeModal();
             showToast("✨ 紀錄已保存");
             if(state.user) {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'xuan-diary-v9';
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'xuan-diary-v10';
                 firebase.firestore().collection('artifacts').doc(appId).collection('users').doc(state.user.uid).collection('settings').doc('main')
                 .set({ records: state.records }, { merge: true });
             }
         }
 
-        function saveLocal() { localStorage.setItem('xuan_v9_records', JSON.stringify(state.records)); }
+        function saveLocal() { localStorage.setItem('xuan_v10_records', JSON.stringify(state.records)); }
         function closeModal() { document.getElementById('modal-overlay').classList.replace('flex', 'hidden'); }
         function changeMonth(s) { state.viewDate.setMonth(state.viewDate.getMonth() + s); renderCalendar(); }
 
@@ -370,13 +374,15 @@
 
         function showToast(m) {
             const t = document.getElementById('toast');
+            if(!t) return;
             t.innerText = m; t.style.opacity = '1';
             setTimeout(() => t.style.opacity = '0', 2500);
         }
 
         window.onload = () => {
             const hr = new Date().getHours();
-            document.getElementById('greeting').innerText = hr < 11 ? "Good Morning, Xuan" : hr < 17 ? "Good Afternoon, Xuan" : "Good Evening, Xuan";
+            const g = document.getElementById('greeting');
+            if(g) g.innerText = hr < 11 ? "Good Morning, Xuan" : hr < 17 ? "Good Afternoon, Xuan" : "Good Evening, Xuan";
             renderCalendar();
             lucide.createIcons();
         };
